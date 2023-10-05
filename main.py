@@ -1,6 +1,8 @@
 import requests
+
 import polyline
 import matplotlib.pyplot as plt
+import pandas as pd
 
 import strava_data as strava
 
@@ -8,6 +10,7 @@ def transform_data(data):
     for d in data:
         del d["athlete"]
         d["map"] = d["map"]["summary_polyline"]
+        d["start_date"] = pd.to_datetime(d["start_date"])
     return data
 
 def get_elevation(lat, long):
@@ -27,7 +30,7 @@ def get_elevations(coords):
     elevs = [r["elevation"] for r in rs]
     return elevs
 
-def get_score(item, weights):
+def activity_effort_score(item, weights):
     distance_score = item["distance"]*weights["distance"]
     moving_time_score = item["moving_time"]*weights["moving_time"]
     average_speed_score = item["average_speed"]*weights["average_speed"]
@@ -42,11 +45,15 @@ def get_score(item, weights):
     max_speed_score + elev_diff_score
     return score
 
-def process(weights):
+def get_date_as_pd():
     data = strava.process()
     data = transform_data(data)
-    scores = [get_score(d, weights) for d in data]
-    print(scores)
+    return data
+
+def process(weights):
+    data = get_date_as_pd()
+    scores = [activity_effort_score(d, weights) for d in data]
+    return scores
 
 
 WEIGHTS = {
@@ -58,7 +65,8 @@ WEIGHTS = {
 }
 
 if __name__ == "__main__":
-    process(WEIGHTS)
+    scores = process(WEIGHTS)
+    print(scores)
 
 
 
