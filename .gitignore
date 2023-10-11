@@ -2,6 +2,10 @@
 __pycache__/
 *.py[cod]
 *$py.class
+*.csv
+
+# User defined
+data.json
 
 # C extensions
 *.so

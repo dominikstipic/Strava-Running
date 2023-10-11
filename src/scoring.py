@@ -1,17 +1,11 @@
 import requests
+import json
 
 import polyline
 import matplotlib.pyplot as plt
 import pandas as pd
 
-import strava_data as strava
-
-def transform_data(data):
-    for d in data:
-        del d["athlete"]
-        d["map"] = d["map"]["summary_polyline"]
-        d["start_date"] = pd.to_datetime(d["start_date"])
-    return data
+import src.strava_data as strava
 
 def get_elevation(lat, long):
     query = ('https://api.open-elevation.com/api/v1/lookup'
@@ -45,13 +39,9 @@ def activity_effort_score(item, weights):
     max_speed_score + elev_diff_score
     return score
 
-def get_date_as_pd():
-    data = strava.process()
-    data = transform_data(data)
-    return data
 
 def process(weights):
-    data = get_date_as_pd()
+    data = strava.process()
     scores = [activity_effort_score(d, weights) for d in data]
     return scores
 

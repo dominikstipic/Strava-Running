@@ -1,4 +1,5 @@
 import requests
+import pandas as pd
 
 def request_access_token(refresh_token):
     auth_url = "https://www.strava.com/oauth/token"
@@ -19,10 +20,19 @@ def fetch_data(access_token):
     my_dataset = requests.get(activities_url, headers=header, params=param).json()
     return my_dataset
 
+def transform_data(data):
+    for d in data:
+        del d["athlete"]
+        d["map"] = d["map"]["summary_polyline"]
+        d["start_date"] = pd.to_datetime(d["start_date"])
+        d["start_date_local"] = pd.to_datetime(d["start_date_local"])
+    return data
+
 def process():
     refresh_token = "6daa102959f3408428794d19e99ca360cb24c44a"
     access_token = request_access_token(refresh_token)
     data = fetch_data(access_token)
+    data = transform_data(data)
     return data
 
 if __name__ == "__main__":

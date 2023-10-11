@@ -1,3 +1,3 @@
 # Mend-Bagla-Running
 
-Application for retrieving Strava data and performing activity scoring.
+An application for retrieving Strava data and performing activity scoring.
