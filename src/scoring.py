@@ -5,7 +5,7 @@ import polyline
 import matplotlib.pyplot as plt
 import pandas as pd
 
-import src.strava_data as strava
+import strava_data as strava
 
 def get_elevation(lat, long):
     query = ('https://api.open-elevation.com/api/v1/lookup'
@@ -29,9 +29,13 @@ def activity_effort_score(item, weights):
     moving_time_score = item["moving_time"]*weights["moving_time"]
     average_speed_score = item["average_speed"]*weights["average_speed"]
     max_speed_score = item["max_speed"]*weights["max_speed"]
-    elev_low = item["elev_low"]
-    elev_high = item["elev_high"]
-    elev_diff_score = (elev_high - elev_low)*weights["elevation_diff"]
+
+    if "elev_low" in item.keys():
+        elev_low = item["elev_low"]
+        elev_high = item["elev_high"]
+        elev_diff_score = (elev_high - elev_low)*weights["elevation_diff"]
+    else:
+        elev_low, elev_high, elev_diff_score = 0, 0, 0
     #encoded_coords = item["map"]
     #coords = polyline.decode(encoded_coords)
     #elevs = get_elevations(coords)
@@ -42,8 +46,10 @@ def activity_effort_score(item, weights):
 
 def process(weights):
     data = strava.process()
-    scores = [activity_effort_score(d, weights) for d in data]
-    return scores
+    for d in data:
+        score = activity_effort_score(d, weights)
+        d["score"] = score
+    return data
 
 
 WEIGHTS = {
